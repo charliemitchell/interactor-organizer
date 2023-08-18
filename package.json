@@ -1,0 +1,14 @@
+{
+  "name": "interactor-organizer",
+  "version": "0.0.1",
+  "description": "A javascript version of the interactor/organizer pattern",
+  "license": "MIT",
+  "scripts": {
+    "test": "jest",
+    "tdd": "jest --watchAll",
+    "cover": "jest --coverage"
+  },
+  "devDependencies": {
+    "jest": "^29.6.2"
+  }
+}

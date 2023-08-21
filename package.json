@@ -4,6 +4,9 @@
   "description": "A javascript version of the interactor/organizer pattern",
   "keywords": ["Interactor", "Organizer"],
   "license": "MIT",
+  "repository": {
+    "url": "https://github.com/charliemitchell/interactor-organizer.git"
+  },
   "scripts": {
     "test": "jest",
     "tdd": "jest --watchAll",

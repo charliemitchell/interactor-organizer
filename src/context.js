@@ -1,15 +1,22 @@
+class FailedContextError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "FailedContextError";
+  }
+}
+
 module.exports = class Context {
   constructor (context) {
     Object.assign(this, context)
   }
 
-  fail (errors) {
-    this.failed = true;
+  fail (error) {
+    this.failure = true;
     this.success = false;
-    this.errors = errors;
-    throw(errors)
+    this.error = error;
+    throw new FailedContextError(error)
   }
 
-  failed = false
+  failure = false
   success = false
 }

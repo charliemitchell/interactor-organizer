@@ -1,14 +1,14 @@
 # interactor-organizer
-This implements the interactor/organizer dsegn pattern in javascript.
+An interactor/organizer design pattern for javascript.
 
 ```sh
-yarn add interactor-organizer
+yarn add interactor-organizer-js
 ```
 
 Example: create an organizer to handle updating some object in your system
 update-model.js
 ```js
-const Organizer = require("interactor-organizer/organizer")
+const { Organizer } = require("interactor-organizer")
 const organizeEmailSends = require("../email/send-email-updates")
 
 module.exports = new Organizer(
@@ -30,72 +30,29 @@ some-controller.js
   }
 ```
 
-Valid Interactors: There are many ways to write a valid interactor, they can be object oriented or functional.
-OOP
+Interactors:
 ```js
   module.exports = class UpdateTheModel {
-    get req () {
-      return this.context.req
-    }
-
     async call () {
-      await this.context.model.findOneAndUpdate(req.params.id, req.body)
+      await this.context.model.findOneAndUpdate(req.params.id, this.context.req.body)
     }
   }
 ```
 
 ```js
-  module.exports = class UpdateTheModel {
-    before () {
-      if (!this.context.model) {
-        this.context.fail("a model is required")
-      }
-    }
-    after () {
-      console.log("The model was updated")
-    }
-    around () {
-      console.log("I get called before anything, and after everything")
-    }
-
-    get req () {
-      return this.context.req
-    }
-
-    async call () {
-      await this.context.model.findOneAndUpdate(req.params.id, req.body)
+module.exports = class UpdateTheModel {
+  before () {
+    if (!this.context.model) {
+      this.context.fail("a model is required")
     }
   }
-```
-
-Functional with no hooks
-```js
-  module.exports = async function UpdateTheModel () {
-    const { params, req } = this.context
-    await this.context.model.findOneAndUpdate(params.id, req.body)
+  after () {
+    console.log("The model was updated")
   }
-```
-
-Functional with hooks
-```js
-  
-  async function UpdateTheModel () {
-    await this.context.model.findOneAndUpdate(id, body)
+  async call () {
+    await this.context.model.findOneAndUpdate(req.params.id, this.context.req.body)
   }
-
-  Object.assign(UpdateTheModel, {
-    before () {
-      if (!this.context.model) {
-        this.context.fail("a model is required")
-      }
-    }
-    after () {
-      console.log("The model was updated")
-    }
-    around () {
-      console.log("I get called before anything, and after everything")
-    }
-  })
+}
 ```
 
 Use the skip hook to make interactors optional. return truthy to skip, falsey to invoke
@@ -105,36 +62,21 @@ module.exports = class UpdateTheModel {
     return !this.context.model
   }
 
-  get req () {
-    return this.context.req
-  }
-
   async call () {
-    await this.context.model.findOneAndUpdate(req.params.id, req.body)
+    await this.context.model.findOneAndUpdate(req.params.id, {})
   }
 }
 ```
 
-Or
-```js
-async function UpdateTheModel () {
-  await this.context.model.findOneAndUpdate(id, body)
-}
-
-UpdateTheModel.skip = () {
-  return !this.context.model
-}
-```
 
 You can do the same thing with organizers too.
 ```js
 class UpdateTheModelOrganizer extends Organizer {
-  static async skip () {
+  async skip () {
     return !this.context.model
   }
-  static async before () {}
-  static async after () {}
-  static async around () {}
+  async before () {}
+  async after () {}
 }
 
 module.exports = new UpdateTheModelOrganizer(
@@ -142,18 +84,4 @@ module.exports = new UpdateTheModelOrganizer(
   alertTheBusiness,
   organizeEmailSends
 )
-```
-
-OR
-
-```js
-const UpdateTheModelOrganizer = new Organizer(
-  updateTheModel,
-  alertTheBusiness,
-  organizeEmailSends
-)
-
-UpdateTheModelOrganizer.skip = async () {
-  return !!this.context.model
-}
 ```

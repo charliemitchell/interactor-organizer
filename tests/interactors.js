@@ -1,5 +1,30 @@
 const { Organizer, createInteractor } = require("../index");
 
+module.exports.SetsAValue = class SetsAValue {
+  async call () {
+    this.context.value = true;
+  }
+}
+
+module.exports.HasException = class HasException {
+  async call () {
+    throw new Error("ohno")
+  }
+}
+
+class AllHooks {
+  before() {
+    this.context.before = true
+  }
+  after() {
+    this.context.after = true
+  }
+
+  async call() {
+    this.context.call = true
+  }
+}
+
 module.exports.UploadFile = class UploadFile {
   async call() {
     this.context.file = "tmp/some-file.ext";
@@ -14,7 +39,7 @@ module.exports.ProcessFile = createInteractor(async function () {
 class ValidateUser {
   before () {
     if (!this.context.userParams) {
-      this.context.fail(new Error("context.userParams are required"))
+      this.context.fail(Error("context.userParams are required"))
     }
   }
 
@@ -86,3 +111,5 @@ module.exports.CreateValidAccount = new Organizer(
 )
 
 module.exports.SendCommunications = SendCommunications
+module.exports.ValidateUser = ValidateUser
+module.exports.AllHooks = AllHooks;

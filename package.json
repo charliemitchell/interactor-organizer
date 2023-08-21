@@ -1,7 +1,8 @@
 {
-  "name": "interactor-organizer",
-  "version": "0.0.1",
+  "name": "interactor-organizer-js",
+  "version": "1.0.0",
   "description": "A javascript version of the interactor/organizer pattern",
+  "keywords": ["Interactor", "Organizer"],
   "license": "MIT",
   "scripts": {
     "test": "jest",

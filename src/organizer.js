@@ -13,39 +13,38 @@ module.exports = class Organizer {
     }
 
     const { methods, context } = this;
-
     try {
+      try {
+        // Call hooks of the Organizer Class
+        if (this.skip && (await this.skip.apply(this))) return context;
+        if (this.before) await this.before.apply(this);
+        if (this.after) await this.after.apply(this);
 
-      if (this.skip && (await this.skip.apply(this))) return context;
-      if (this.around) await this.around.apply(this);
-      if (this.before) await this.before.apply(this);
-      if (this.after) await this.after.apply(this);
+        for (var i = 0; i < methods.length; i += 1) {
+          if (methods[i] instanceof Organizer) {
+            await methods[i].call(context);
+            continue;
+          }
 
-      for (var i = 0; i < methods.length; i += 1) {
-        if (methods[i] instanceof Organizer) {
-          await methods[i].call(context);
-          continue;
+          const task = new methods[i]();
+          // Call hooks of the Interactor Class
+          if (task.skip && (await task.skip.apply(this))) continue;
+          if (task.before) await task.before.apply(this);
+          await task.call.apply(this);
+          if (task.after) await task.after.apply(this);
         }
-
-        const task = new methods[i]();
-
-        if (task.skip && (await task.skip.apply(this))) continue;
-        if (task.around) await task.around.apply(this);
-        if (task.before) await task.before.apply(this);
-        await task.call.apply(this);
-        if (task.after) await task.after.apply(this);
-        if (task.around) await task.around.apply(this);
+      } catch (err) {
+        if (err.name != "FailedContextError") context.fail(err);
+        return context;
       }
     } catch (err) {
-      context.fail(err);
       return context;
     }
-
+    // Call the after method of the Organizer Class
     if (this.after) await this.after.apply(this);
-    if (this.around) await this.around.apply(this);
-
+    // No Failures or exceptions
     context.success = true;
 
     return context;
   }
-}
+};

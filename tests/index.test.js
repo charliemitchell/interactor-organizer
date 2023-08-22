@@ -121,3 +121,162 @@ test("the value of `this` is that of the interactor", async () => {
   expect(ctx.failure).toBe(false)
   expect(ctx.value).toBe(true)
 })
+
+test("constructWith", async () => {
+  class MyInteractor {
+    
+    constructor (value1, value2) {
+      this.value1 = value1;
+      this.value2 = value2;
+    }
+
+    call () {
+      this.setValues()
+    }
+
+    setValues () {
+      this.context.value1 = this.value1
+      this.context.value2 = this.value2
+    }
+  }
+
+  const organizer = new Organizer(MyInteractor)
+  var ctx = await organizer.call({}, {constructWith: [true, "value2"]});
+  expect(ctx.error).toBe(undefined)
+  expect(ctx.failure).toBe(false)
+  expect(ctx.value1).toBe(true)
+  expect(ctx.value2).toBe("value2")
+})
+
+test("constructWith and passOptionsToEmbeddedOrganizers = true", async () => {
+  class MyInteractor {
+    
+    constructor (value1, value2) {
+      this.value1 = value1;
+      this.value2 = value2;
+    }
+
+    call () {
+      this.setValues()
+    }
+
+    setValues () {
+      this.context.value1 = this.value1
+      this.context.value2 = this.value2
+    }
+  }
+
+  class MyOtherInteractor {
+    
+    constructor (value1, value2) {
+      this.value1 = value1;
+      this.value2 = value2;
+    }
+
+    call () {
+      this.setValues()
+    }
+
+    setValues () {
+      this.context.value3 = this.value1
+      this.context.value4 = this.value2
+    }
+  }
+
+  const organizer = new Organizer(MyInteractor, new Organizer(MyOtherInteractor))
+  var ctx = await organizer.call({}, {constructWith: [true, "value2"], passOptionsToEmbeddedOrganizers: true});
+  expect(ctx.error).toBe(undefined)
+  expect(ctx.failure).toBe(false)
+  expect(ctx.value1).toBe(true)
+  expect(ctx.value2).toBe("value2")
+  expect(ctx.value3).toBe(true)
+  expect(ctx.value4).toBe("value2")
+})
+
+test("constructWith and passOptionsToEmbeddedOrganizers = false", async () => {
+  class MyInteractor {
+    
+    constructor (value1, value2) {
+      this.value1 = value1;
+      this.value2 = value2;
+    }
+
+    call () {
+      this.setValues()
+    }
+
+    setValues () {
+      this.context.value1 = this.value1
+      this.context.value2 = this.value2
+    }
+  }
+
+  class MyOtherInteractor {
+    
+    constructor (...args) {
+      if (args.length) throw("nope")
+    }
+
+    call () {
+      this.setValues()
+    }
+
+    setValues () {
+      this.context.value3 = this.value1
+      this.context.value4 = this.value2
+    }
+  }
+
+  const organizer = new Organizer(MyInteractor, new Organizer(MyOtherInteractor))
+  var ctx = await organizer.call({}, {constructWith: [true, "value2"], passOptionsToEmbeddedOrganizers: false});
+  expect(ctx.error).toBe(undefined)
+  expect(ctx.failure).toBe(false)
+  expect(ctx.value1).toBe(true)
+  expect(ctx.value2).toBe("value2")
+  expect(ctx.value3).toBe(undefined)
+  expect(ctx.value4).toBe(undefined)
+})
+
+test("constructWith and passOptionsToEmbeddedOrganizers = undefined", async () => {
+  class MyInteractor {
+    
+    constructor (value1, value2) {
+      this.value1 = value1;
+      this.value2 = value2;
+    }
+
+    call () {
+      this.setValues()
+    }
+
+    setValues () {
+      this.context.value1 = this.value1
+      this.context.value2 = this.value2
+    }
+  }
+
+  class MyOtherInteractor {
+    
+    constructor (...args) {
+      if (args.length) throw("nope")
+    }
+
+    call () {
+      this.setValues()
+    }
+
+    setValues () {
+      this.context.value3 = this.value1
+      this.context.value4 = this.value2
+    }
+  }
+
+  const organizer = new Organizer(MyInteractor, new Organizer(MyOtherInteractor))
+  var ctx = await organizer.call({}, {constructWith: [true, "value2"]});
+  expect(ctx.error).toBe(undefined)
+  expect(ctx.failure).toBe(false)
+  expect(ctx.value1).toBe(true)
+  expect(ctx.value2).toBe("value2")
+  expect(ctx.value3).toBe(undefined)
+  expect(ctx.value4).toBe(undefined)
+})

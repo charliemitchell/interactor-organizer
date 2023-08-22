@@ -5,7 +5,7 @@ module.exports = class Organizer {
     this.methods = methods;
   }
 
-  async call(initialContext) {
+  async call(initialContext, options = {constructWith: []}) {
     if (initialContext instanceof Context) {
       this.context = initialContext;
     } else {
@@ -22,12 +22,15 @@ module.exports = class Organizer {
 
         for (var i = 0; i < methods.length; i += 1) {
           if (methods[i] instanceof Organizer) {
-            await methods[i].call(context);
+            await methods[i].call(
+              context,
+              options.passOptionsToEmbeddedOrganizers ? options : undefined
+            );
             continue;
           }
 
-          const task = new methods[i]();
-          task.context = context
+          const task = new methods[i](...options.constructWith);
+          task.context = context;
           // Call hooks of the Interactor Class
           if (task.skip && (await task.skip())) continue;
           if (task.before) await task.before();

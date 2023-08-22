@@ -27,11 +27,12 @@ module.exports = class Organizer {
           }
 
           const task = new methods[i]();
+          task.context = context
           // Call hooks of the Interactor Class
-          if (task.skip && (await task.skip.apply(this))) continue;
-          if (task.before) await task.before.apply(this);
-          await task.call.apply(this);
-          if (task.after) await task.after.apply(this);
+          if (task.skip && (await task.skip())) continue;
+          if (task.before) await task.before();
+          await task.call();
+          if (task.after) await task.after();
         }
       } catch (err) {
         if (err.name != "FailedContextError") context.fail(err);
@@ -41,7 +42,7 @@ module.exports = class Organizer {
       return context;
     }
     // Call the after method of the Organizer Class
-    if (this.after) await this.after.apply(this);
+    if (this.after) await this.after();
     // No Failures or exceptions
     context.success = true;
 

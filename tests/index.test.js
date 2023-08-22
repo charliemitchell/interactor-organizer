@@ -103,3 +103,21 @@ test("An exception stops execution, and fails the context", async () => {
   expect(ctx.value).toBe(undefined)
   expect(ctx.failure).toBe(true)
 })
+
+test("the value of `this` is that of the interactor", async () => {
+  class MyInteractor {
+    call () {
+      this.setValue()
+    }
+
+    setValue () {
+      this.context.value = true
+    }
+  }
+
+  const organizer = new Organizer(MyInteractor)
+  var ctx = await organizer.call({});
+  expect(ctx.error).toBe(undefined)
+  expect(ctx.failure).toBe(false)
+  expect(ctx.value).toBe(true)
+})
